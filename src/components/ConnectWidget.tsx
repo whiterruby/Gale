@@ -1,9 +1,10 @@
 // Sidebar footer: live tunnel status, session clock and kill button.
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import { Power, Loader2 } from 'lucide-react';
 import { useGaleStore } from '../store';
 import { t } from '../locales';
 import { ShieldIcon, BoltIcon } from './GaleIcons';
+import { useElapsed } from '../hooks/useElapsed';
 
 function formatElapsed(since: number | null): string {
   if (!since) return '00:00';
@@ -17,15 +18,9 @@ function formatElapsed(since: number | null): string {
 
 export const ConnectWidget: React.FC = () => {
   const { status, activeServerId, servers, connectedSince, exitIp, disconnect, language } = useGaleStore();
-  const [, setTick] = useState(0);
+  // Tick the session clock while the tunnel is up.
+  useElapsed(status === 'connected');
   const server = servers.find((s) => s.id === activeServerId) ?? null;
-
-  // Re-render once a second while connected so the session clock ticks.
-  useEffect(() => {
-    if (status !== 'connected') return;
-    const id = setInterval(() => setTick((v) => v + 1), 1000);
-    return () => clearInterval(id);
-  }, [status]);
 
   const dot =
     status === 'connected' ? 'bg-sage' : status === 'connecting' ? 'bg-amberDeep animate-pulse' : 'bg-terracotta';
