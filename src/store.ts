@@ -58,9 +58,20 @@ function writeLocal(key: string, value: string): void {
   }
 }
 
+function readFavorites(): string[] {
+  try {
+    const raw = localStorage.getItem('gale_favorites');
+    if (!raw) return [];
+    const parsed: unknown = JSON.parse(raw);
+    return Array.isArray(parsed) ? parsed.filter((x): x is string => typeof x === 'string') : [];
+  } catch {
+    return [];
+  }
+}
+
 export const useGaleStore = create<GaleStore>((set, get) => ({
   servers: [],
-  favorites: [],
+  favorites: readFavorites(),
   status: 'disconnected',
   activeServerId: null,
   connectedSince: null,
@@ -102,7 +113,13 @@ export const useGaleStore = create<GaleStore>((set, get) => ({
   setKillSwitch: (killSwitch) => set({ killSwitch }),
   toggleFavorite: (id) => {
     const favs = get().favorites;
-    set({ favorites: favs.includes(id) ? favs.filter((f) => f !== id) : [...favs, id] });
+    const next = favs.includes(id) ? favs.filter((f) => f !== id) : [...favs, id];
+    set({ favorites: next });
+    try {
+      localStorage.setItem('gale_favorites', JSON.stringify(next));
+    } catch {
+      /* private mode — ignore */
+    }
   },
   openDetails: (detailsServerId) => set({ detailsServerId }),
 
