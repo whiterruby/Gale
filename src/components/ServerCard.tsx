@@ -1,6 +1,6 @@
 // One browsable endpoint: latency badge, load stats and quick actions.
 import React from 'react';
-import { Zap, Info } from 'lucide-react';
+import { Zap, Info, Power, Loader2 } from 'lucide-react';
 import type { VpnServer } from '../types';
 import { useGaleStore } from '../store';
 import { t } from '../locales';
@@ -13,10 +13,12 @@ function pingTone(ping: number): string {
 }
 
 export const ServerCard: React.FC<{ server: VpnServer }> = ({ server }) => {
-  const { favorites, toggleFavorite, status, activeServerId, connect, openDetails, language } = useGaleStore();
+  const { favorites, toggleFavorite, status, activeServerId, connect, disconnect, openDetails, language } = useGaleStore();
   const isFav = favorites.includes(server.id);
   const isActive = activeServerId === server.id && status !== 'disconnected';
-  const busy = status === 'connecting';
+  const isThisConnected = activeServerId === server.id && status === 'connected';
+  const isThisConnecting = activeServerId === server.id && status === 'connecting';
+  const busyOther = status === 'connecting' && !isThisConnecting;
 
   return (
     <div
@@ -73,12 +75,24 @@ export const ServerCard: React.FC<{ server: VpnServer }> = ({ server }) => {
           <Info className="w-4 h-4" />
         </button>
         <button
-          onClick={() => connect(server.id)}
-          disabled={busy}
-          className="px-4 py-2 bg-ink text-paper rounded-full text-xs font-medium flex items-center gap-1.5 hover:opacity-90 transition disabled:opacity-50"
+          onClick={() => (isThisConnected ? disconnect() : connect(server.id))}
+          disabled={busyOther}
+          className={`px-4 py-2 rounded-full text-xs font-medium flex items-center gap-1.5 transition disabled:opacity-50 ${
+            isThisConnected ? 'bg-sage text-white hover:opacity-90' : 'bg-ink text-paper hover:opacity-90'
+          }`}
         >
-          <Zap className="w-3.5 h-3.5" />
-          {t('connect', language)}
+          {isThisConnecting ? (
+            <Loader2 className="w-3.5 h-3.5 animate-spin" />
+          ) : isThisConnected ? (
+            <Power className="w-3.5 h-3.5" />
+          ) : (
+            <Zap className="w-3.5 h-3.5" />
+          )}
+          {isThisConnected
+            ? t('connected', language)
+            : isThisConnecting
+              ? t('connecting', language)
+              : t('connect', language)}
         </button>
       </div>
     </div>
