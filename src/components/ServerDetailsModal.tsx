@@ -1,5 +1,5 @@
 // Gate inspector: health stats, embedded .ovpn copy/download and connect.
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { X, Zap, Copy, Check, Download } from 'lucide-react';
 import { useGaleStore } from '../store';
 import { t } from '../locales';
@@ -14,6 +14,15 @@ export const ServerDetailsModal: React.FC = () => {
 
   const ovpn = renderOvpn(server);
   const busy = status === 'connecting';
+
+  // ESC to close; backdrop click is handled on the overlay.
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') openDetails(null);
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [openDetails]);
 
   const handleCopy = async () => {
     try {
@@ -48,8 +57,11 @@ export const ServerDetailsModal: React.FC = () => {
   ];
 
   return (
-    <div className="fixed inset-0 bg-modalOverlay backdrop-blur-sm z-50 flex items-center justify-center p-4">
-      <div className="bg-cardBg border border-line rounded-[24px] max-w-md w-full p-6 space-y-4 shadow-mirai">
+    <div className="fixed inset-0 bg-modalOverlay backdrop-blur-sm z-50 flex items-center justify-center p-4" onClick={() => openDetails(null)}>
+      <div
+        className="bg-cardBg border border-line rounded-[24px] max-w-md w-full p-6 space-y-4 shadow-mirai"
+        onClick={(e) => e.stopPropagation()}
+      >
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
             <span className="w-10 h-10 rounded-2xl bg-gradient-to-br from-amberMirai to-terracotta flex items-center justify-center text-white text-xs font-bold font-mono">
