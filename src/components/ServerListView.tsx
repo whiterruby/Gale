@@ -49,14 +49,17 @@ export const ServerListView: React.FC = () => {
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             placeholder={t('search_placeholder', language)}
+            aria-label={t('search_placeholder', language)}
             className="w-full bg-cream border border-line rounded-full pl-9 pr-4 py-2.5 text-sm text-ink placeholder:text-muted focus:outline-none focus:border-amberMirai/40 focus:bg-cardBg transition"
           />
         </div>
-        <div className="flex items-center gap-1 bg-cream border border-line rounded-full p-1">
+        <div className="flex items-center gap-1 bg-cream border border-line rounded-full p-1" role="group" aria-label="Tier filter">
           {(['all', 'free', 'plus'] as const).map((f) => (
             <button
               key={f}
               onClick={() => setTier(f)}
+              aria-pressed={tier === f}
+              aria-label={f === 'all' ? t('tier_all', language) : f === 'free' ? t('tier_free', language) : t('tier_plus', language)}
               className={`px-3.5 py-1.5 text-xs rounded-full font-medium transition ${
                 tier === f ? 'bg-ink text-paper shadow-sm' : 'text-muted hover:text-ink'
               }`}
