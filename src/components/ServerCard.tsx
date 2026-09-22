@@ -5,10 +5,12 @@ import type { VpnServer } from '../types';
 import { useGaleStore } from '../store';
 import { t } from '../locales';
 import { StarIcon, StarFilledIcon } from './GaleIcons';
+import { pingTier, formatPing, formatSpeed, formatUptime } from '../utils/format';
 
 function pingTone(ping: number): string {
-  if (ping < 60) return 'text-moss border-sage/30 bg-sage/10';
-  if (ping < 130) return 'text-amberDeep border-amberMirai/30 bg-amberMirai/10';
+  const tier = pingTier(ping);
+  if (tier === 'good') return 'text-moss border-sage/30 bg-sage/10';
+  if (tier === 'mid') return 'text-amberDeep border-amberMirai/30 bg-amberMirai/10';
   return 'text-terracotta border-terracotta/30 bg-terracotta/10';
 }
 
@@ -49,13 +51,13 @@ export const ServerCard: React.FC<{ server: VpnServer }> = ({ server }) => {
         </p>
         <div className="flex items-center gap-3 mt-1.5 text-[11px] text-muted">
           <span className={`px-2 py-0.5 rounded-full border font-mono ${pingTone(server.ping_ms)}`}>
-            {server.ping_ms} ms
+            {formatPing(server.ping_ms)}
           </span>
-          <span>{server.speed_mbps.toFixed(0)} Mb/s</span>
+          <span>{formatSpeed(server.speed_mbps)}</span>
           <span>
             {server.sessions} {t('sessions', language).toLowerCase()}
           </span>
-          <span>{server.uptime_pct.toFixed(1)}%</span>
+          <span>{formatUptime(server.uptime_pct)}</span>
         </div>
       </div>
 
