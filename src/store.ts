@@ -84,8 +84,8 @@ export const useGaleStore = create<GaleStore>((set, get) => ({
   activeTab: 'servers',
   language: (readLocal('gale_lang', 'tr') as Language) || 'tr',
   theme: (readLocal('gale_theme', 'dark') as 'light' | 'dark') || 'dark',
-  autoConnect: false,
-  killSwitch: true,
+  autoConnect: readLocal('gale_auto', '0') === '1',
+  killSwitch: readLocal('gale_kill', '1') !== '0',
   detailsServerId: null,
 
   setQuery: (query) => set({ query }),
@@ -109,8 +109,14 @@ export const useGaleStore = create<GaleStore>((set, get) => ({
   toggleTheme: () => {
     get().setTheme(get().theme === 'light' ? 'dark' : 'light');
   },
-  setAutoConnect: (autoConnect) => set({ autoConnect }),
-  setKillSwitch: (killSwitch) => set({ killSwitch }),
+  setAutoConnect: (autoConnect) => {
+    set({ autoConnect });
+    writeLocal('gale_auto', autoConnect ? '1' : '0');
+  },
+  setKillSwitch: (killSwitch) => {
+    set({ killSwitch });
+    writeLocal('gale_kill', killSwitch ? '1' : '0');
+  },
   toggleFavorite: (id) => {
     const favs = get().favorites;
     const next = favs.includes(id) ? favs.filter((f) => f !== id) : [...favs, id];
